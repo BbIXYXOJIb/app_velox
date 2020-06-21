@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 
 from image_resizer.types import StatusTypes
 
-def resize_image(task_object): # TODO mv this to model
+def resize_image(task_object):
     width = task_object.target_width
     height = task_object.target_height
     task_object.img.open()
