@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'u+x$-97s-+r@7*yg$#s8!(p%u(59g4nsxl$77h)9$bssw1kb_2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'image_resizer',
+    'django_q',
+    'coverage',
 ]
 
 MIDDLEWARE = [
@@ -78,9 +80,13 @@ WSGI_APPLICATION = 'app_velox.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DATABASE_NAME', 'image_resizer'),
+        'USER': os.environ.get('DATABASE_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', '123'),
+        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
+        'PORT': os.environ.get('DATABASE_PORT', '5432')
+    },
 }
 
 
@@ -125,10 +131,28 @@ STATIC_URL = '/files/'
 MEDIA_URL = '/media/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'files')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'database', 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 FILE_UPLOAD_HANDLERS = [
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
     'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 ]
+
+
+Q_CLUSTER = {
+    'name': 'default',
+    'workers': 8,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'save_limit': 250,
+    'queue_limit': 500,
+    'cpu_affinity': 1,
+    'label': 'Django Q',
+    'redis': {
+        'host': os.environ.get("REDIS_HOST"),
+        'port': os.environ.get("REDIS_PORT"),
+        'password': os.environ.get('REDIS_PASSWORD'),
+        'db': 0, }
+}
