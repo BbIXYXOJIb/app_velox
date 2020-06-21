@@ -34,11 +34,13 @@ Redis быстрый и [не теряет таски](http://oldblog.antirez.co
 ## API
 POST /api/resize-task
 Формат данных
+```
 {
     "target_width": null,
     "target_height": null,
     "img": null
 }
+```
 Парсит applicaton/json, application/x-www-form-urlencoded, application/form-data
 
 GET /api/resize-task/<UUID>
