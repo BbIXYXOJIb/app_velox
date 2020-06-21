@@ -3,13 +3,14 @@ from rest_framework import serializers
 from image_resizer.types import StatusTypes
 
 class ResizeTaskSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
     status = serializers.ChoiceField(choices=StatusTypes.choices, read_only=True)
-    target_width = serializers.IntegerField()
-    target_height = serializers.IntegerField()
-    img = serializers.FileField()
+    target_width = serializers.IntegerField(write_only=True)
+    target_height = serializers.IntegerField(write_only=True)
+    img = serializers.ImageField()
     class Meta:
         model = ResizeTask
-        fields  = ('status', 'target_width', 'target_height', 'img')
+        fields  = ('id', 'status', 'target_width', 'target_height', 'img')
 
     def validate(self, attrs):
         if attrs['target_width'] > 9999 or attrs['target_height'] > 9999:
@@ -19,3 +20,9 @@ class ResizeTaskSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Image dimensions can not be 0 or less.")
 
         return attrs
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret.get('status') != StatusTypes.DONE:
+            del ret['img']
+        return ret
