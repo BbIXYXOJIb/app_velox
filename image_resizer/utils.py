@@ -6,15 +6,16 @@ from django.core.files.base import ContentFile
 
 from image_resizer.types import StatusTypes
 
-def resize_image(img: Any, width: int, height: int, task_object): # TODO mv this to model
-    print(f'Resizing image to {width}x{height}')
-    resized_img = Image.open(img).\
+def resize_image(task_object): # TODO mv this to model
+    width = task_object.target_width
+    height = task_object.target_height
+    task_object.img.open()
+    resized_img = Image.open(task_object.img).\
         resize((width, height))
     resized_img_io = BytesIO()
-    img_ext = determine_ext(img.name)
-    print(img_ext)
+    img_ext = determine_ext(task_object.img.name)
     resized_img.save(resized_img_io, format=img_ext)
-    task_object.img.save(img.name, ContentFile(resized_img_io.getvalue()))
+    task_object.img.save(task_object.img.name, ContentFile(resized_img_io.getvalue()))
     task_object.status = StatusTypes.DONE
     task_object.save()
     resized_img_io.close()
